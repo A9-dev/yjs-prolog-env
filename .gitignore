@@ -30,3 +30,6 @@ temp/
 
 # Coverage reports
 coverage/
+
+
+watched_json_files/
