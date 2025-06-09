@@ -25,6 +25,7 @@ class JSONFileWatcher {
   private watcher?: FSWatcher;
 
   constructor(targetFolder: string, options: WatcherOptions = {}) {
+    console.log("[DEBUG] Initializing JSONFileWatcher");
     this.targetFolder = targetFolder;
     this.ydoc = new Y.Doc();
     this.yarray = this.ydoc.getArray<FileEntry>("jsonContents");
@@ -38,50 +39,60 @@ class JSONFileWatcher {
 
     this.setupWatcher();
     this.setupYjsObserver();
+    console.log("[DEBUG] JSONFileWatcher initialized");
   }
 
   private setupWatcher() {
-    console.log(`Starting to watch folder: ${this.targetFolder}`);
+    console.log(`[DEBUG] Starting to watch folder: ${this.targetFolder}`);
 
-    this.watcher = chokidar.watch(
-      path.join(this.targetFolder, "*.json"),
-      this.options
+    this.watcher = chokidar.watch(".", {
+      // Watch the target folder, but only react to .json files
+      cwd: this.targetFolder,
+      atomic: true,
+      awaitWriteFinish: true,
+      ignored: (f, stats) => !!stats && stats.isFile() && !f.endsWith(".json"),
+      usePolling: true,
+      interval: 100,
+      ...this.options,
+    });
+
+    console.log(
+      "[DEBUG] Absolute target folder path:",
+      path.resolve(this.targetFolder)
     );
 
     this.watcher
       .on("add", (filePath) => this.handleFileAdd(filePath))
       .on("change", (filePath) => this.handleFileChange(filePath))
       .on("unlink", (filePath) => this.handleFileRemove(filePath))
-      .on("error", (error) => console.error("Watcher error:", error))
+      .on("error", (error) => console.error("[DEBUG] Watcher error:", error))
       .on("ready", () =>
-        console.log("Initial scan complete. Ready for changes.")
-      );
+        console.log("[DEBUG] Initial scan complete. Ready for changes.")
+      )
+      .on("all", (event, filePath) => {
+        console.log(`[DEBUG] Event: ${event}, File: ${filePath}`);
+      });
   }
 
   private setupYjsObserver() {
-    this.yarray.observe((event) => {
-      console.log("Y.js array updated:");
-      event.changes.added.forEach((item) => {
-        console.log("Added:", item.content.getContent()[0]);
-      });
-      event.changes.deleted.forEach(() => {
-        console.log("Removed item");
-      });
+    this.ydoc.on("update", () => {
+      console.log("[DEBUG] Y.js document received an update");
+      this.printCurrentState();
     });
   }
 
   private async handleFileAdd(filePath: string) {
-    console.log(`New JSON file detected: ${filePath}`);
+    console.log(`[DEBUG] New JSON file detected: ${filePath}`);
     await this.processJSONFile(filePath, "add");
   }
 
   private async handleFileChange(filePath: string) {
-    console.log(`JSON file changed: ${filePath}`);
+    console.log(`[DEBUG] JSON file changed: ${filePath}`);
     await this.processJSONFile(filePath, "change");
   }
 
   private async handleFileRemove(filePath: string) {
-    console.log(`JSON file removed: ${filePath}`);
+    console.log(`[DEBUG] JSON file removed: ${filePath}`);
     const fileName = path.basename(filePath);
     this.processedFiles.delete(fileName);
 
@@ -92,15 +103,24 @@ class JSONFileWatcher {
 
     if (indexToRemove !== -1) {
       this.yarray.delete(indexToRemove, 1);
-      console.log(`Removed ${fileName} from Y.js array`);
+      console.log(`[DEBUG] Removed ${fileName} from Y.js array`);
+    } else {
+      console.log(
+        `[DEBUG] Tried to remove ${fileName} but it was not found in Y.js array`
+      );
     }
   }
 
   private async processJSONFile(filePath: string, action: "add" | "change") {
     try {
+      console.log(
+        `[DEBUG] Processing file: ${filePath} with action: ${action}`
+      );
       const fileName = path.basename(filePath);
       const fileContent = await fs.readFile(filePath, "utf8");
+      console.log(`[DEBUG] Read content from ${filePath}`);
       const jsonData = JSON.parse(fileContent);
+      console.log(`[DEBUG] Parsed JSON data from ${filePath}`);
 
       const fileEntry: FileEntry = {
         fileName,
@@ -119,44 +139,58 @@ class JSONFileWatcher {
         if (existingIndex !== -1) {
           this.yarray.delete(existingIndex, 1);
           this.yarray.insert(existingIndex, [fileEntry]);
-          console.log(`Updated ${fileName} in Y.js array`);
+          console.log(
+            `[DEBUG] Updated ${fileName} in Y.js array at index ${existingIndex}`
+          );
         } else {
           this.yarray.push([fileEntry]);
-          console.log(`Added ${fileName} to Y.js array (not found for update)`);
+          console.log(
+            `[DEBUG] Added ${fileName} to Y.js array (not found for update)`
+          );
         }
       } else {
         this.yarray.push([fileEntry]);
-        console.log(`Added ${fileName} to Y.js array`);
+        console.log(`[DEBUG] Added ${fileName} to Y.js array`);
       }
 
       this.processedFiles.add(fileName);
+      console.log(
+        `[DEBUG] Processed files set updated:`,
+        Array.from(this.processedFiles)
+      );
     } catch (error: any) {
-      console.error(`Error processing ${filePath}:`, error.message);
+      console.error(`[DEBUG] Error processing ${filePath}:`, error.message);
     }
   }
 
   public getArrayContents(): FileEntry[] {
+    console.log("[DEBUG] getArrayContents called");
     return this.yarray.toArray();
   }
 
   public getYDoc(): Y.Doc {
+    console.log("[DEBUG] getYDoc called");
     return this.ydoc;
   }
 
   public stop(): void {
     if (this.watcher) {
       this.watcher.close();
-      console.log("File watcher stopped");
+      console.log("[DEBUG] File watcher stopped");
+    } else {
+      console.log("[DEBUG] File watcher was not running");
     }
   }
 
   public printCurrentState(): void {
     console.log("\n=== Current Y.js Array State ===");
     const contents = this.getArrayContents();
-    console.log(`Total entries: ${contents.length}`);
+    console.log(`[DEBUG] Total entries: ${contents.length}`);
     contents.forEach((entry, index) => {
       console.log(
-        `${index + 1}. ${entry.fileName} (${entry.action} at ${entry.timestamp})`
+        `${index + 1}. ${entry.fileName} (${entry.action} at ${
+          entry.timestamp
+        })`
       );
     });
     console.log("================================\n");
