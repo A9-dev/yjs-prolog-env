@@ -175,6 +175,7 @@ class JSONFileWatcher {
       fileName: entry.fileName,
       action: entry.action,
       timestamp: entry.timestamp,
+      content: entry.content,
     }));
 
     logger.info(
