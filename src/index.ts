@@ -1,14 +1,15 @@
 import { promises as fs } from "fs";
 import JSONFileWatcher from "./JSONFileWatcher";
+import logger from "./logger";
 
 async function main() {
   const targetFolder = "./watched_json_files";
 
   try {
     await fs.mkdir(targetFolder, { recursive: true });
-    console.log(`Created/verified target folder: ${targetFolder}`);
+    logger.info({ targetFolder }, "Target folder ready");
   } catch (error: any) {
-    console.error("Error creating target folder:", error.message);
+    logger.error({ err: error }, "Failed to create target folder");
     return;
   }
 
@@ -19,16 +20,14 @@ async function main() {
   }, 10000);
 
   process.on("SIGINT", () => {
-    console.log("\nShutting down gracefully...");
+    logger.info("Received SIGINT, shutting down gracefully...");
     clearInterval(stateInterval);
     watcher.stop();
     process.exit(0);
   });
 
-  console.log(
-    "\nFile watcher is running. Try adding/modifying/removing JSON files in the watched folder."
-  );
-  console.log("Press Ctrl+C to stop.\n");
+  logger.info("File watcher running – modify JSON files in the watched folder");
+  logger.info("Press Ctrl+C to stop");
 }
 
-main().catch(console.error);
+main().catch((err) => logger.error({ err }, "Unhandled error in main"));
