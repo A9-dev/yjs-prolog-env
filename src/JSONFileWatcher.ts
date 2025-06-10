@@ -63,8 +63,6 @@ class JSONFileWatcher {
 
     this.watcher
       .on("add", (filePath) => this.handleFileAdd(filePath))
-      .on("change", (filePath) => this.handleFileChange(filePath))
-      // .on("unlink", (filePath) => this.handleFileRemove(filePath)) // Uncomment to re-enable removal
       .on("error", (error) =>
         this.logger.error({ err: error }, "Watcher encountered an error")
       )
@@ -81,28 +79,6 @@ class JSONFileWatcher {
     this.logger.info({ absFilePath: absFilePath }, "New file detected");
     await this.processJSONFile(absFilePath, "add");
   }
-
-  private async handleFileChange(filePath: string) {
-    const absFilePath = path.resolve(this.targetFolder, filePath);
-    this.logger.info({ absFilePath }, "File modified");
-    await this.processJSONFile(absFilePath, "change");
-  }
-
-  // private async handleFileRemove(filePath: string) {
-  //   const fileName = path.resolve(this.targetFolder, filePath);
-  //   this.processedFiles.delete(fileName);
-
-  //   const index = this.yarray
-  //     .toArray()
-  //     .findIndex((entry) => entry.fileName === fileName);
-
-  //   if (index !== -1) {
-  //     this.yarray.delete(index, 1);
-  //     this.logger.info({ fileName }, "Removed file from Yjs array");
-  //   } else {
-  //     this.logger.warn({ fileName }, "File not found in Yjs array during removal");
-  //   }
-  // }
 
   private async processJSONFile(filePath: string, action: "add" | "change") {
     const fileName = path.resolve(this.targetFolder, filePath);
@@ -138,7 +114,10 @@ class JSONFileWatcher {
 
       this.processedFiles.add(fileName); // Track processed files by their absolute path
     } catch (error: any) {
-      this.logger.error({ fileName, err: error }, "Failed to process JSON file");
+      this.logger.error(
+        { fileName, err: error },
+        "Failed to process JSON file"
+      );
     }
   }
 
