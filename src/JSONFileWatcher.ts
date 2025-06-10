@@ -25,7 +25,7 @@ class JSONFileWatcher {
   private processedFiles: Set<string>;
   private watcher?: FSWatcher;
 
-  constructor(targetFolder: string, ) {
+  constructor(targetFolder: string) {
     this.targetFolder = targetFolder;
     this.ydoc = new Y.Doc();
     this.yarray = this.ydoc.getArray<FileEntry>("jsonContents");
@@ -54,17 +54,17 @@ class JSONFileWatcher {
       awaitWriteFinish: true,
       ignored: (f, stats) => !!stats && stats.isFile() && !f.endsWith(".json"),
       usePolling: true,
-      interval: 100,
+      interval: 300,
       ...this.options,
     });
 
     this.watcher
       .on("add", (filePath) => this.handleFileAdd(filePath))
-      .on("change", (filePath) => this.handleFileChange(filePath))
-      .on("unlink", (filePath) => this.handleFileRemove(filePath))
-      .on("error", (error) =>
-        logger.error({ err: error }, "Watcher encountered an error")
-      )
+      // .on("change", (filePath) => this.handleFileChange(filePath))
+      // .on("unlink", (filePath) => this.handleFileRemove(filePath))
+      // .on("error", (error) =>
+      //   logger.error({ err: error }, "Watcher encountered an error")
+      // )
       .on("ready", () =>
         logger.info("Initial scan complete. Ready for file changes")
       )
@@ -81,35 +81,37 @@ class JSONFileWatcher {
   }
 
   private async handleFileAdd(filePath: string) {
-    logger.info({ filePath }, "New file detected");
-    await this.processJSONFile(filePath, "add");
+    const absFilePath = path.resolve(this.targetFolder, filePath);
+    logger.info({ absFilePath: absFilePath }, "New file detected");
+    await this.processJSONFile(absFilePath, "add");
   }
 
-  private async handleFileChange(filePath: string) {
-    logger.info({ filePath }, "File modified");
-    await this.processJSONFile(filePath, "change");
-  }
+  // private async handleFileChange(filePath: string) {
+  //   logger.info({ filePath }, "File modified");
+  //   await this.processJSONFile(filePath, "change");
+  // }
 
-  private async handleFileRemove(filePath: string) {
-    const fileName = path.basename(filePath);
-    this.processedFiles.delete(fileName);
+  // private async handleFileRemove(filePath: string) {
+  //   const fileName = path.basename(filePath);
+  //   this.processedFiles.delete(fileName);
 
-    const index = this.yarray
-      .toArray()
-      .findIndex((entry) => entry.fileName === fileName);
+  //   const index = this.yarray
+  //     .toArray()
+  //     .findIndex((entry) => entry.fileName === fileName);
 
-    if (index !== -1) {
-      this.yarray.delete(index, 1);
-      logger.info({ fileName }, "Removed file from Yjs array");
-    } else {
-      logger.warn({ fileName }, "File not found in Yjs array during removal");
-    }
-  }
+  //   if (index !== -1) {
+  //     this.yarray.delete(index, 1);
+  //     logger.info({ fileName }, "Removed file from Yjs array");
+  //   } else {
+  //     logger.warn({ fileName }, "File not found in Yjs array during removal");
+  //   }
+  // }
 
   private async processJSONFile(filePath: string, action: "add" | "change") {
-    const fileName = path.basename(filePath);
+    const fileName = path.resolve(this.targetFolder,filePath);
 
     try {
+      logger.info({filePath, action}, "Processing JSON file");
       const fileContent = await fs.readFile(filePath, "utf8");
       const jsonData = JSON.parse(fileContent);
 
