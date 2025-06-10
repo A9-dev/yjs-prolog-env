@@ -33,3 +33,5 @@ coverage/
 
 
 watched_json_files/
+
+test.json
