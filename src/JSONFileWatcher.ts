@@ -25,14 +25,13 @@ class JSONFileWatcher {
   private processedFiles: Set<string>;
   private watcher?: FSWatcher;
 
-  constructor(targetFolder: string, options: WatcherOptions = {}) {
+  constructor(targetFolder: string, ) {
     this.targetFolder = targetFolder;
     this.ydoc = new Y.Doc();
     this.yarray = this.ydoc.getArray<FileEntry>("jsonContents");
     this.options = {
       ignoreInitial: false,
       persistent: true,
-      ...options,
     };
 
     this.processedFiles = new Set();
