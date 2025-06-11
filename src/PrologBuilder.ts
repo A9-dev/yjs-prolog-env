@@ -29,7 +29,8 @@ class PrologBuilder {
         await this.buildPrologKnowledgeBase();
         logger.info("Prolog knowledge base built, proceeding to query");
 
-        await this.querySwiplEngine("solve(Houses).");
+        const result = await this.querySwiplEngine("solve(Houses).");
+        logger.info({ result }, "Prolog query result:");
       } catch (err) {
         logger.error({ error: err }, "Error during Prolog build or query");
       }
@@ -85,17 +86,19 @@ class PrologBuilder {
       logger.error({ error: err }, "Failed to initialize SWIPL engine");
     }
   }
-  private async querySwiplEngine(query: string): Promise<void> {
+  private async querySwiplEngine(query: string): Promise<any> {
     if (!this.swiplEngine) {
       logger.warn("SWIPL engine not initialized. Skipping query.");
-      return;
+      return null;
     }
 
     try {
       const result = this.swiplEngine.prolog.query(query).once();
       logger.debug({ query, result }, "Prolog query result");
+      return result;
     } catch (err) {
       logger.error({ error: err, query }, "Error during Prolog query");
+      return null;
     }
   }
 }
