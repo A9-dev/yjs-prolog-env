@@ -1,7 +1,7 @@
 # Installation
-1. Install [pnpm](https://pnpm.io/installation)
-2. Run `pnpm install` to install the dependencies
+1. Install [pnpm](https://pnpm.io/installation).
+2. Run `pnpm install` to install the dependencies.
 
 # Usage
-1. Run `pnpm dev`
-2. Move `.json` files into the `watched_json_files/` folder that is created, and observe the yarray get updated and PrologBuilder run a `buildPrologKnowledgeBase` function
+1. Run `pnpm dev`.
+2. Move `.json` files into the `watched_json_files/` folder that is created, and observe the yarray get updated and PrologBuilder run a `buildPrologKnowledgeBase` function.
