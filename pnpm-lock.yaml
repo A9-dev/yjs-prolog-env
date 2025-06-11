@@ -17,6 +17,9 @@ importers:
       pino-pretty:
         specifier: ^13.0.0
         version: 13.0.0
+      swipl-wasm:
+        specifier: ^5.0.11
+        version: 5.0.11
       y-websocket:
         specifier: ^3.0.0
         version: 3.0.0(yjs@13.6.27)
@@ -67,6 +70,9 @@ packages:
 
   '@types/chokidar@1.7.5':
     resolution: {integrity: sha512-PDkSRY7KltW3M60hSBlerxI8SFPXsO3AL/aRVsO4Kh9IHRW74Ih75gUuTd/aE4LSSFqypb10UIX3QzOJwBQMGQ==}
+
+  '@types/emscripten@1.40.1':
+    resolution: {integrity: sha512-sr53lnYkQNhjHNN0oJDdUm5564biioI5DuOpycufDVK7D3y+GR3oUswe2rlwY1nPNyusHbrJ9WoTyIHl4/Bpwg==}
 
   '@types/events@3.0.3':
     resolution: {integrity: sha512-trOc4AAUThEz9hapPtSd7wf5tiQKvTtu5b371UxXdTuqzIh0ArcRspRP0i0Viu+LXstIQ1z96t1nsPxT9ol01g==}
@@ -197,6 +203,10 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
+  swipl-wasm@5.0.11:
+    resolution: {integrity: sha512-Dv0bAh73Vv/UABJJWZOtrfr3sjlSsQ4mxlILEZ2c2OKBfRI+dvTuGi7VSbljm51BLKVV8lmObGoN7eeTyQTiZw==}
+    hasBin: true
+
   thread-stream@3.1.0:
     resolution: {integrity: sha512-OqyPZ9u96VohAyMfJykzmivOrY2wfMSf3C5TtFJVgN+Hm6aj+voFhlK+kZEIv2FBh1X6Xp3DlnCOfEQ3B2J86A==}
 
@@ -275,6 +285,8 @@ snapshots:
     dependencies:
       '@types/events': 3.0.3
       '@types/node': 22.15.31
+
+  '@types/emscripten@1.40.1': {}
 
   '@types/events@3.0.3': {}
 
@@ -394,6 +406,10 @@ snapshots:
   split2@4.2.0: {}
 
   strip-json-comments@3.1.1: {}
+
+  swipl-wasm@5.0.11:
+    dependencies:
+      '@types/emscripten': 1.40.1
 
   thread-stream@3.1.0:
     dependencies:

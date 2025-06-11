@@ -1,5 +1,6 @@
 import * as Y from "yjs";
 import logger from "./logger";
+import SWIPL from "swipl-wasm";
 
 interface FileEntry {
   fileName: string;
@@ -12,6 +13,7 @@ interface FileEntry {
 class PrologBuilder {
   private ydoc: Y.Doc;
   private yarray: Y.Array<FileEntry>;
+  private swiplEngine: any;
 
   constructor(ydoc: Y.Doc, yarray: Y.Array<FileEntry>) {
     this.ydoc = ydoc;
@@ -21,37 +23,80 @@ class PrologBuilder {
   }
 
   private setupYjsObserver() {
-    this.ydoc.on("update", () => {
+    this.ydoc.on("update", async () => {
       logger.debug("Yjs document updated - triggering Prolog build process");
-      this.buildPrologKnowledgeBase();
+      try {
+        await this.buildPrologKnowledgeBase();
+        logger.info("Prolog knowledge base built, proceeding to query");
+
+        await this.querySwiplEngine("solve(Houses).");
+      } catch (err) {
+        logger.error({ error: err }, "Error during Prolog build or query");
+      }
     });
-    if (this.yarray.length > 0) {
-      logger.debug(
-        "Initial Yjs array has content, triggering initial Prolog build."
-      );
-      this.buildPrologKnowledgeBase();
-    }
   }
 
-  private buildPrologKnowledgeBase(): void {
+  private async buildPrologKnowledgeBase(): Promise<void> {
     const contents = this.yarray.toArray();
     logger.info(
-      { totalFiles: contents.length },
-      "Yjs array changed, rebuilding knowledge base."
+      { fileCount: contents.length },
+      "Rebuilding Prolog knowledge base from file entries"
     );
-    const mappedContents = contents.map((entry, index) => ({
-      index: index + 1,
-      fileName: entry.fileName,
-      action: entry.action,
-      timestamp: entry.timestamp,
-      content: entry.content,
-    }));
-    logger.info(
-      {
-        contents: mappedContents,
-      },
-      "Current Yjs array state for Prolog knowledge base:"
-    );
+
+    try {
+      const engine: any = await SWIPL({ arguments: ["-q"] });
+      logger.debug("Initialized new SWIPL engine");
+
+      let prologSource = "";
+
+      for (const entry of contents) {
+        if (entry.content?.prolog) {
+          logger.debug(
+            { fileName: entry.fileName },
+            "Appending Prolog content"
+          );
+          prologSource += entry.content.prolog + "\n";
+        } else {
+          logger.warn(
+            { fileName: entry.fileName },
+            "Skipping file: missing Prolog content"
+          );
+        }
+      }
+
+      try {
+        engine.prolog.load_string(prologSource);
+        logger.info("Loaded Prolog content into engine");
+      } catch (err) {
+        logger.error(
+          { error: err },
+          "Error loading Prolog content into engine"
+        );
+        return;
+      }
+
+      try {
+        this.swiplEngine = await Promise.resolve(engine);
+        logger.info("SWIPL engine successfully assigned to instance");
+      } catch (err) {
+        logger.error({ error: err }, "Failed to assign SWIPL engine");
+      }
+    } catch (err) {
+      logger.error({ error: err }, "Failed to initialize SWIPL engine");
+    }
+  }
+  private async querySwiplEngine(query: string): Promise<void> {
+    if (!this.swiplEngine) {
+      logger.warn("SWIPL engine not initialized. Skipping query.");
+      return;
+    }
+
+    try {
+      const result = this.swiplEngine.prolog.query(query).once();
+      logger.debug({ query, result }, "Prolog query result");
+    } catch (err) {
+      logger.error({ error: err, query }, "Error during Prolog query");
+    }
   }
 
   public getArrayContents(): FileEntry[] {

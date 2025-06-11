@@ -9,7 +9,7 @@ const logger = pino({
       ignore: "pid,hostname",
     },
   },
-  level: process.env.LOG_LEVEL || "info",
+  level: process.env.LOG_LEVEL || "debug",
 });
 
 export default logger;
