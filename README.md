@@ -1,6 +1,6 @@
 # Installation
 1. Install [pnpm](https://pnpm.io/installation)
-2. Run `pnpm install`
+2. Run `pnpm install` to install the dependencies
 
 # Usage
 1. Run `pnpm dev`
