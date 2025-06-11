@@ -98,10 +98,6 @@ class PrologBuilder {
       logger.error({ error: err, query }, "Error during Prolog query");
     }
   }
-
-  public getArrayContents(): FileEntry[] {
-    return this.yarray.toArray();
-  }
 }
 
 export default PrologBuilder;
