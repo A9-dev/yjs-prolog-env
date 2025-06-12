@@ -1,3 +1,0 @@
-{
-  "prolog": ":- dynamic parent/2, ancestor/2, cousin/2, uncle/2.\n\nparent(alice, bob).\nparent(alice, claire).\nparent(bob, david).\nparent(claire, emily).\nparent(david, frank).\nparent(emily, george).\n\nancestor(X, Y) :- parent(X, Y).\nancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).\n\nsibling(X, Y) :- parent(Z, X), parent(Z, Y), X \\= Y.\n\ncousin(X, Y) :-\n    parent(A, X),\n    parent(B, Y),\n    sibling(A, B).\n\nuncle(X, Y) :-\n    parent(P, Y),\n    sibling(X, P),\n    male(X).\n\nmale(bob).\nmale(david).\nmale(frank).\nmale(george).\nmale(john).\n"
-}
