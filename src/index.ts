@@ -23,7 +23,7 @@ async function main() {
 
   // Start JSON watcher and Prolog builder
   const watcher = new JSONFileWatcher(targetFolder, ydoc, yarray);
-  const builder = new PrologBuilder(ydoc, yarray);
+  const builder = await PrologBuilder.init(ydoc, yarray);
   const service = new PrologService(builder);
 
   // Start Express server

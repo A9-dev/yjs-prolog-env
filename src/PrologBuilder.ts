@@ -14,14 +14,60 @@ class PrologBuilder {
   private ydoc: Y.Doc;
   private yarray: Y.Array<FileEntry>;
   private swiplEngine: any;
+  private isInitialised: boolean = false;
 
+  /**
+   * Private constructor. Use `PrologBuilder.init()` to create an instance.
+   */
   constructor(ydoc: Y.Doc, yarray: Y.Array<FileEntry>) {
     this.ydoc = ydoc;
     this.yarray = yarray;
-    logger.debug("Initializing PrologBuilder");
-    this.setupYjsObserver();
   }
 
+  /**
+   * Asynchronously creates and initializes a PrologBuilder instance.
+   * Must be used instead of the constructor.
+   */
+  public static async init(
+    ydoc: Y.Doc,
+    yarray: Y.Array<FileEntry>
+  ): Promise<PrologBuilder> {
+    logger.debug(
+      { ydoc, yarray },
+      "Initializing PrologBuilder with Yjs document and array"
+    );
+    const builder = new PrologBuilder(ydoc, yarray);
+
+    builder.setupYjsObserver();
+
+    try {
+      builder.swiplEngine = await SWIPL({ arguments: ["-q"] });
+      logger.info("Blank SWIPL engine initialised in PrologBuilder");
+      await builder.buildPrologKnowledgeBase();
+      builder.isInitialised = true;
+    } catch (err) {
+      logger.error({ error: err }, "Failed to initialize SWIPL engine");
+      throw err;
+    }
+
+    return builder;
+  }
+
+  /**
+   * Ensure the PrologBuilder is fully initialized before using.
+   */
+  private ensureInitialised() {
+    if (!this.isInitialised) {
+      throw new Error(
+        "PrologBuilder not initialized. Use PrologBuilder.init() and await it before calling methods."
+      );
+    }
+  }
+
+  /**
+   * Sets up an observer on the Yjs document to rebuild the Prolog knowledge base
+   * whenever the Yjs array is updated.
+   */
   private setupYjsObserver() {
     this.ydoc.on("update", async () => {
       logger.debug("Yjs document updated - triggering Prolog build process");
@@ -35,6 +81,10 @@ class PrologBuilder {
     });
   }
 
+  /**
+   * Rebuilds the Prolog knowledge base from the Yjs array.
+   * This is called automatically when the Yjs document updates.
+   */
   private async buildPrologKnowledgeBase(): Promise<void> {
     const contents = this.yarray.toArray();
     logger.info(
@@ -95,7 +145,12 @@ class PrologBuilder {
     }
   }
 
+  /**
+   * Queries the SWIPL engine with a Prolog query string.
+   * Returns the result of the query or null if an error occurs.
+   */
   public async querySwiplEngine(query: string): Promise<any> {
+    this.ensureInitialised();
     if (!this.swiplEngine) {
       logger.warn("SWIPL engine not initialized. Skipping query.");
       return null;
@@ -110,7 +165,12 @@ class PrologBuilder {
     }
   }
 
+  /**
+   * Adds a new Prolog rule to the SWIPL engine.
+   * This can be used to dynamically extend the Prolog knowledge base.
+   */
   public async addRule(rule: string): Promise<void> {
+    this.ensureInitialised();
     if (!this.swiplEngine) {
       throw new Error("SWIPL engine not initialized");
     }
