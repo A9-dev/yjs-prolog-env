@@ -110,7 +110,6 @@ class PrologBuilder {
     }
   }
 
-  // Add to PrologBuilder.ts
   public async addRule(rule: string): Promise<void> {
     if (!this.swiplEngine) {
       throw new Error("SWIPL engine not initialized");

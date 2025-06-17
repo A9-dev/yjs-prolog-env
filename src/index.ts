@@ -1,6 +1,4 @@
-// src/index.ts
 import { promises as fs } from "fs";
-import * as Y from "yjs";
 import path from "path";
 import JSONFileWatcher from "./JSONFileWatcher";
 import PrologBuilder from "./PrologBuilder";
