@@ -54,14 +54,14 @@ The system consists of several key components:
 
 2. The server will:
 
-   - Create a `watched_json_files` directory
+   - Create a `watched_json_files/` directory
    - Start monitoring for JSON files
    - Initialize the Prolog engine
    - Start the API server on port 3000
 
 3. To use the system:
 
-   - Place JSON files from `example_prolog/` or elsewhere in the `watched_json_files` directory
+   - Place JSON files from `example_prolog/` or elsewhere in the `watched_json_files/` directory
    - The system will automatically:
      - Process new/changed files
      - Update the Y.js document
