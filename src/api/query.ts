@@ -1,4 +1,3 @@
-// src/api/query.ts
 import { Router, RequestHandler } from "express";
 import PrologService from "../services/PrologService";
 
