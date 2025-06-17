@@ -8,11 +8,11 @@ export default function createPrologRouter(service: PrologService): Router {
     try {
       const { prolog } = req.body;
       if (typeof prolog !== "string") {
-        res.status(400).json({ error: "Invalid rule format" });
+        res.status(400).json({ error: "Invalid prolog rule format" });
         return;
       }
       await service.addRule(prolog);
-      res.status(200).json({ message: "Rule added successfully" });
+      res.status(200).json({ message: "Prolog rule added successfully" });
     } catch (err) {
       next(err);
     }
