@@ -38,7 +38,7 @@ The system consists of several key components:
 
 ## Installation
 
-1. Install Node.js and npm (or pnpm)
+1. Install Node.js and pnpm
 2. Clone the repository
 3. Install dependencies:
    ```bash
@@ -62,7 +62,7 @@ The system consists of several key components:
 
 3. To use the system:
 
-   - Place JSON files in the `watched_json_files` directory
+   - Place JSON files from `example_prolog/` or elsewhere in the `watched_json_files` directory
    - The system will automatically:
      - Process new/changed files
      - Update the Y.js document
@@ -72,6 +72,7 @@ The system consists of several key components:
 4. API Endpoints:
    - `POST /api/rules` - Add a new Prolog rule
    - `POST /api/query` - Execute a Prolog query
+     - You can find example queries in `example_queries/` for each example prolog rule set in `example_prolog/`.
 
 ## API Input Formats
 
