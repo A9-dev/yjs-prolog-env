@@ -28,7 +28,7 @@ class PrologBuilder {
       try {
         await this.buildPrologKnowledgeBase();
         logger.info("Prolog knowledge base rebuilt successfully");
-        await this.runExampleQueries();
+        //! Run custom logic here if implementing a bespoke service
       } catch (err) {
         logger.error({ error: err }, "Error during Prolog build or query");
       }
@@ -115,27 +115,6 @@ class PrologBuilder {
       throw new Error("SWIPL engine not initialized");
     }
     this.swiplEngine.prolog.load_string(rule);
-  }
-
-  private async runExampleQueries(): Promise<void> {
-    const exampleQueries = [
-      "path(a, h, P).",
-      "member(X, [a,b,c]).",
-      "ancestor(alice, george).",
-      "solve(Houses).",
-    ];
-
-    for (const query of exampleQueries) {
-      try {
-        const result = await this.querySwiplEngine(query);
-        logger.info(
-          { result: JSON.stringify(result) },
-          `Example query result: ${query}`
-        );
-      } catch (err) {
-        logger.error({ error: err, query }, `Error in example query: ${query}`);
-      }
-    }
   }
 }
 

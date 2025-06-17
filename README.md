@@ -27,7 +27,6 @@ The system consists of several key components:
 
    - Converts JSON data into Prolog knowledge base
    - Uses SWI-Prolog for Prolog execution
-   - Provides example queries for testing
    - Maintains synchronized state with Y.js
 
 3. **API Server**
@@ -67,7 +66,6 @@ The system consists of several key components:
      - Process new/changed files
      - Update the Y.js document
      - Rebuild the Prolog knowledge base
-     - Run example queries
 
 4. API Endpoints:
    - `POST /api/rules` - Add a new Prolog rule
