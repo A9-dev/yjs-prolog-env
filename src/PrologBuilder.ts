@@ -95,7 +95,7 @@ class PrologBuilder {
     }
   }
 
-  private async querySwiplEngine(query: string): Promise<any> {
+  public async querySwiplEngine(query: string): Promise<any> {
     if (!this.swiplEngine) {
       logger.warn("SWIPL engine not initialized. Skipping query.");
       return null;
@@ -108,6 +108,14 @@ class PrologBuilder {
       logger.error({ error: err, query }, "Error during Prolog query");
       return null;
     }
+  }
+
+  // Add to PrologBuilder.ts
+  public async addRule(rule: string): Promise<void> {
+    if (!this.swiplEngine) {
+      throw new Error("SWIPL engine not initialized");
+    }
+    this.swiplEngine.prolog.load_string(rule);
   }
 
   private async runExampleQueries(): Promise<void> {
