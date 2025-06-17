@@ -1,17 +1,17 @@
 import { Router, RequestHandler } from "express";
 import PrologService from "../services/PrologService";
 
-export default function createRulesRouter(service: PrologService): Router {
+export default function createPrologRouter(service: PrologService): Router {
   const router = Router();
 
   const handler: RequestHandler = async (req, res, next) => {
     try {
-      const { rule } = req.body;
-      if (typeof rule !== "string") {
+      const { prolog } = req.body;
+      if (typeof prolog !== "string") {
         res.status(400).json({ error: "Invalid rule format" });
         return;
       }
-      await service.addRule(rule);
+      await service.addRule(prolog);
       res.status(200).json({ message: "Rule added successfully" });
     } catch (err) {
       next(err);

@@ -31,7 +31,7 @@ The system consists of several key components:
 
 3. **API Server**
    - REST API endpoints for querying Prolog knowledge base
-   - Endpoints for adding rules and executing queries
+   - Endpoints for adding prolog rules and executing queries
    - Built with Express.js
    - Includes error handling middleware
 
@@ -68,7 +68,7 @@ The system consists of several key components:
      - Rebuild the Prolog knowledge base
 
 4. API Endpoints:
-   - `POST /api/rules` - Add a new Prolog rule
+   - `POST /api/prolog` - Add new Prolog rules
    - `POST /api/query` - Execute a Prolog query
      - You can find example queries in `example_queries/` for each example prolog rule set in `example_prolog/`.
 
@@ -76,7 +76,7 @@ The system consists of several key components:
 
 ### Add a Prolog Rule
 
-**POST** `/api/rules`
+**POST** `/api/prolog`
 
 Request body:
 
