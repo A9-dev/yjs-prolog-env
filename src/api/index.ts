@@ -1,11 +1,11 @@
 import { Router } from "express";
 import createPrologRouter from "./prolog";
 import createQueryRouter from "./query";
-import PrologService from "../services/PrologService";
+import PrologQueryService from "../services/PrologQueryService";
 import YjsService from "../services/YjsService";
 
 export default function setupRoutes(
-  prologService: PrologService,
+  prologService: PrologQueryService,
   yjsService: YjsService
 ) {
   const router = Router();

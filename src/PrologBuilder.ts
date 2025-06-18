@@ -1,35 +1,25 @@
-import * as Y from "yjs";
 import logger from "./logger";
 import SWIPL from "swipl-wasm";
-import { PrologYArrayItem } from "./types";
+import YjsService from "./services/YjsService";
 
-class PrologBuilder {
-  private ydoc: Y.Doc;
-  private yarray: Y.Array<PrologYArrayItem>;
+class PrologEnvironment {
+  private yjsService: YjsService;
   private swiplEngine: any;
   private isInitialised: boolean = false;
 
   /**
    * Private constructor. Use `PrologBuilder.init()` to create an instance.
    */
-  constructor(ydoc: Y.Doc, yarray: Y.Array<PrologYArrayItem>) {
-    this.ydoc = ydoc;
-    this.yarray = yarray;
+  constructor(yjsService: YjsService) {
+    this.yjsService = yjsService;
   }
 
   /**
    * Asynchronously creates and initializes a PrologBuilder instance.
    * Must be used instead of the constructor.
    */
-  public static async init(
-    ydoc: Y.Doc,
-    yarray: Y.Array<PrologYArrayItem>
-  ): Promise<PrologBuilder> {
-    logger.debug(
-      { ydoc, yarray },
-      "Initializing PrologBuilder with Yjs document and array"
-    );
-    const builder = new PrologBuilder(ydoc, yarray);
+  public static async init(yjsService: YjsService): Promise<PrologEnvironment> {
+    const builder = new PrologEnvironment(yjsService);
 
     builder.setupYjsObserver();
 
@@ -62,7 +52,8 @@ class PrologBuilder {
    * whenever the Yjs array is updated.
    */
   private setupYjsObserver() {
-    this.ydoc.on("update", async () => {
+    const ydoc = this.yjsService.getDoc();
+    ydoc.on("update", async () => {
       logger.debug("Yjs document updated - triggering Prolog build process");
       try {
         await this.buildPrologKnowledgeBase();
@@ -79,7 +70,8 @@ class PrologBuilder {
    * This is called automatically when the Yjs document updates.
    */
   private async buildPrologKnowledgeBase(): Promise<void> {
-    const contents = this.yarray.toArray();
+    const yarray = this.yjsService.getArray();
+    const contents = yarray.toArray();
     logger.info(
       { fileCount: contents.length },
       "Rebuilding Prolog knowledge base from file entries"
@@ -157,18 +149,6 @@ class PrologBuilder {
       return null;
     }
   }
-
-  /**
-   * Adds a new Prolog rule to the SWIPL engine.
-   * This can be used to dynamically extend the Prolog knowledge base.
-   */
-  public async addRule(rule: string): Promise<void> {
-    this.ensureInitialised();
-    if (!this.swiplEngine) {
-      throw new Error("SWIPL engine not initialized");
-    }
-    this.swiplEngine.prolog.load_string(rule);
-  }
 }
 
-export default PrologBuilder;
+export default PrologEnvironment;

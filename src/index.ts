@@ -1,8 +1,8 @@
 import { promises as fs } from "fs";
 import path from "path";
 import JSONFileWatcher from "./JSONFileWatcher";
-import PrologBuilder from "./PrologBuilder";
-import PrologService from "./services/PrologService";
+import PrologEnvironment from "./PrologBuilder";
+import PrologQueryService from "./services/PrologQueryService";
 import setupRoutes from "./api";
 import errorHandler from "./middleware/errorHandler";
 import logger from "./logger";
@@ -22,17 +22,17 @@ async function main() {
   }
 
   // Start JSON watcher and Prolog builder
-  const watcher = new JSONFileWatcher(targetFolder, ydoc, yarray);
-  const builder = await PrologBuilder.init(ydoc, yarray);
-  const prologService = new PrologService(builder);
   const yjsService = new YjsService(ydoc, yarray);
+  const jsonFileWatcher = new JSONFileWatcher(targetFolder, yjsService);
+  const prologEnvironment = await PrologEnvironment.init(yjsService);
+  const prologQueryService = new PrologQueryService(prologEnvironment);
 
   // Start Express server
   const app = express();
   const port = process.env.PORT || 3000;
 
   app.use(express.json());
-  app.use("/api", setupRoutes(prologService, yjsService));
+  app.use("/api", setupRoutes(prologQueryService, yjsService));
   app.use(errorHandler);
 
   app.listen(port, () => {
@@ -42,7 +42,7 @@ async function main() {
   // Graceful shutdown
   process.on("SIGINT", () => {
     logger.info("Received SIGINT, shutting down gracefully...");
-    watcher.stop();
+    jsonFileWatcher.stop();
     process.exit(0);
   });
 

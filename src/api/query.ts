@@ -1,7 +1,7 @@
 import { Router, RequestHandler } from "express";
-import PrologService from "../services/PrologService";
+import PrologQueryService from "../services/PrologQueryService";
 
-export default function createQueryRouter(service: PrologService): Router {
+export default function createQueryRouter(service: PrologQueryService): Router {
   const router = Router();
 
   const handler: RequestHandler = async (req, res, next) => {

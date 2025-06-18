@@ -1,5 +1,5 @@
 import { Router, RequestHandler } from "express";
-import PrologService from "../services/PrologService";
+import PrologQueryService from "../services/PrologQueryService";
 import YjsService from "../services/YjsService";
 import { APIRule } from "../types";
 

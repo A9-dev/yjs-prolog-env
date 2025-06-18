@@ -1,10 +1,9 @@
 import { promises as fs } from "fs";
 import path from "path";
 import chokidar, { FSWatcher } from "chokidar";
-import * as Y from "yjs";
 import logger from "./logger";
-import { FileEntry, APIRule, PrologYArrayItem } from "./types";
-import { json } from "stream/consumers";
+import YjsService from "./services/YjsService";
+import { FileEntry } from "./types";
 
 interface WatcherOptions {
   ignoreInitial?: boolean;
@@ -22,19 +21,13 @@ function isValidPrologJson(data: any): data is { prolog: string } {
 
 class JSONFileWatcher {
   private targetFolder: string;
-  private ydoc: Y.Doc;
-  private yarray: Y.Array<PrologYArrayItem>;
+  private yjsService: YjsService;
   private options: WatcherOptions;
   private watcher?: FSWatcher;
 
-  constructor(
-    targetFolder: string,
-    ydoc: Y.Doc,
-    yarray: Y.Array<PrologYArrayItem>
-  ) {
+  constructor(targetFolder: string, yjsService: YjsService) {
     this.targetFolder = targetFolder;
-    this.ydoc = ydoc;
-    this.yarray = yarray;
+    this.yjsService = yjsService;
     this.options = {
       ignoreInitial: false,
       persistent: true,
@@ -98,7 +91,7 @@ class JSONFileWatcher {
         prolog: jsonData.prolog,
         timestamp: new Date().toISOString(),
       };
-      this.yarray.push([fileEntry]);
+      this.yjsService.addItem(fileEntry);
       logger.info({ fileName: fileEntry.fileName }, "File added to Yjs array");
     } catch (error) {
       logger.error(
