@@ -8,5 +8,5 @@ export default function errorHandler(
   next: NextFunction
 ) {
   logger.error({ err }, "Unhandled API error");
-  res.status(500).json({ error: "Internal server error" });
+  res.status(500).json({ error: err.message || "Internal Server Error" });
 }
