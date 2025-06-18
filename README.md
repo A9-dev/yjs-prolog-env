@@ -1,4 +1,4 @@
-# JSON-YJS-Watcher
+# Yjs Prolog Environment Builder
 
 A real-time JSON file monitoring system that integrates with Prolog for query processing. This project watches a directory for JSON files, maintains a synchronized state using Y.js, and provides a Prolog-based query interface for analyzing the JSON data.
 
