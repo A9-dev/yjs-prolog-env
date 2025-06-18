@@ -1,7 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import JSONFileWatcher from "./JSONFileWatcher";
-import PrologEnvironment from "./PrologBuilder";
+import PrologEnvironment from "./PrologEnvironment";
 import PrologQueryService from "./services/PrologQueryService";
 import setupRoutes from "./api";
 import errorHandler from "./middleware/errorHandler";

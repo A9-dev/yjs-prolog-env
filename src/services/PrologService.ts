@@ -1,14 +1,14 @@
-import PrologBuilder from "../PrologBuilder";
+import PrologEnvironment from "../PrologEnvironment";
 
 class PrologService {
-  private builder: PrologBuilder;
+  private prologEnvironment: PrologEnvironment;
 
-  constructor(builder: PrologBuilder) {
-    this.builder = builder;
+  constructor(builder: PrologEnvironment) {
+    this.prologEnvironment = builder;
   }
 
   public async query(query: string) {
-    return await this.builder.querySwiplEngine(query);
+    return await this.prologEnvironment.querySwiplEngine(query);
   }
 }
 
