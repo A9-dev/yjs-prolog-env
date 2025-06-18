@@ -7,7 +7,7 @@ import setupRoutes from "./api";
 import errorHandler from "./middleware/errorHandler";
 import logger from "./logger";
 import express from "express";
-
+import YjsService from "./services/YjsService";
 import { ydoc, yarray } from "./yjsInstance";
 
 async function main() {
@@ -24,14 +24,15 @@ async function main() {
   // Start JSON watcher and Prolog builder
   const watcher = new JSONFileWatcher(targetFolder, ydoc, yarray);
   const builder = await PrologBuilder.init(ydoc, yarray);
-  const service = new PrologService(builder);
+  const prologService = new PrologService(builder);
+  const yjsService = new YjsService(ydoc, yarray);
 
   // Start Express server
   const app = express();
   const port = process.env.PORT || 3000;
 
   app.use(express.json());
-  app.use("/api", setupRoutes(service));
+  app.use("/api", setupRoutes(prologService, yjsService));
   app.use(errorHandler);
 
   app.listen(port, () => {

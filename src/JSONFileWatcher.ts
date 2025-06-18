@@ -3,29 +3,35 @@ import path from "path";
 import chokidar, { FSWatcher } from "chokidar";
 import * as Y from "yjs";
 import logger from "./logger";
-
-interface FileEntry {
-  fileName: string;
-  filePath: string;
-  content: any;
-  timestamp: string;
-  action: "add" | "change";
-}
+import { FileEntry, APIRule, PrologYArrayItem } from "./types";
+import { json } from "stream/consumers";
 
 interface WatcherOptions {
   ignoreInitial?: boolean;
   persistent?: boolean;
 }
 
+function isValidPrologJson(data: any): data is { prolog: string } {
+  return (
+    data &&
+    typeof data === "object" &&
+    typeof data.prolog === "string" &&
+    data.prolog.trim().length > 0
+  );
+}
+
 class JSONFileWatcher {
   private targetFolder: string;
   private ydoc: Y.Doc;
-  private yarray: Y.Array<FileEntry>;
+  private yarray: Y.Array<PrologYArrayItem>;
   private options: WatcherOptions;
-  private processedFiles: Set<string>;
   private watcher?: FSWatcher;
 
-  constructor(targetFolder: string, ydoc: Y.Doc, yarray: Y.Array<FileEntry>) {
+  constructor(
+    targetFolder: string,
+    ydoc: Y.Doc,
+    yarray: Y.Array<PrologYArrayItem>
+  ) {
     this.targetFolder = targetFolder;
     this.ydoc = ydoc;
     this.yarray = yarray;
@@ -33,7 +39,6 @@ class JSONFileWatcher {
       ignoreInitial: false,
       persistent: true,
     };
-    this.processedFiles = new Set();
     logger.debug("Initializing JSONFileWatcher");
     this.setupWatcher();
     logger.info({ targetFolder }, "Watcher initialized");
@@ -64,39 +69,42 @@ class JSONFileWatcher {
       });
   }
 
+  /**
+   * Handles the addition of a new JSON file to the yarray.
+   * @param filePath Path of the newly added JSON file
+   */
   private async handleFileAdd(filePath: string) {
     const absFilePath = path.resolve(this.targetFolder, filePath);
     logger.info({ absFilePath: absFilePath }, "New file detected");
-    await this.processJSONFile(absFilePath, "add");
-  }
-
-  private async processJSONFile(filePath: string, action: "add" | "change") {
-    const fileName = path.resolve(this.targetFolder, filePath);
     try {
-      logger.info({ filePath, action }, "Processing JSON file");
-      const fileContent = await fs.readFile(filePath, "utf8");
+      const fileContent = await fs.readFile(absFilePath, "utf-8");
       const jsonData = JSON.parse(fileContent);
-      const fileEntry: FileEntry = {
-        fileName,
-        filePath,
-        content: jsonData,
-        timestamp: new Date().toISOString(),
-        action,
-      };
-      const existingIndex = this.yarray
-        .toArray()
-        .findIndex((item) => item.fileName === fileName);
-      if (existingIndex !== -1) {
-        this.yarray.delete(existingIndex, 1);
-        this.yarray.insert(existingIndex, [fileEntry]);
-        logger.debug({ fileName }, "Updated entry in Yjs array");
-      } else {
-        this.yarray.push([fileEntry]);
-        logger.debug({ fileName }, "Added new entry to Yjs array");
+      if (!isValidPrologJson(jsonData)) {
+        logger.warn(
+          { filePath: absFilePath },
+          "Invalid prolog format in JSON file, skipping"
+        );
+        return;
       }
-      this.processedFiles.add(fileName);
-    } catch (error: any) {
-      logger.error({ fileName, err: error }, "Failed to process JSON file");
+
+      logger.debug(
+        { filePath: absFilePath, prolog: jsonData.prolog },
+        "Valid prolog rule found in JSON file"
+      );
+
+      const fileEntry: FileEntry = {
+        fileName: path.basename(filePath),
+        filePath: absFilePath,
+        prolog: jsonData.prolog,
+        timestamp: new Date().toISOString(),
+      };
+      this.yarray.push([fileEntry]);
+      logger.info({ fileName: fileEntry.fileName }, "File added to Yjs array");
+    } catch (error) {
+      logger.error(
+        { filePath: absFilePath, err: error },
+        "Failed to read or parse JSON file"
+      );
     }
   }
 

@@ -1,25 +1,18 @@
 import * as Y from "yjs";
 import logger from "./logger";
 import SWIPL from "swipl-wasm";
-
-interface FileEntry {
-  fileName: string;
-  filePath: string;
-  content: any;
-  timestamp: string;
-  action: "add" | "change";
-}
+import { PrologYArrayItem } from "./types";
 
 class PrologBuilder {
   private ydoc: Y.Doc;
-  private yarray: Y.Array<FileEntry>;
+  private yarray: Y.Array<PrologYArrayItem>;
   private swiplEngine: any;
   private isInitialised: boolean = false;
 
   /**
    * Private constructor. Use `PrologBuilder.init()` to create an instance.
    */
-  constructor(ydoc: Y.Doc, yarray: Y.Array<FileEntry>) {
+  constructor(ydoc: Y.Doc, yarray: Y.Array<PrologYArrayItem>) {
     this.ydoc = ydoc;
     this.yarray = yarray;
   }
@@ -30,7 +23,7 @@ class PrologBuilder {
    */
   public static async init(
     ydoc: Y.Doc,
-    yarray: Y.Array<FileEntry>
+    yarray: Y.Array<PrologYArrayItem>
   ): Promise<PrologBuilder> {
     logger.debug(
       { ydoc, yarray },
@@ -91,7 +84,10 @@ class PrologBuilder {
       { fileCount: contents.length },
       "Rebuilding Prolog knowledge base from file entries"
     );
-
+    logger.debug(
+      { contents },
+      "Contents of Yjs array before building Prolog knowledge base"
+    );
     try {
       const engine: any = await SWIPL({ arguments: ["-q"] });
       logger.debug("SWIPL engine initialized");
@@ -99,14 +95,11 @@ class PrologBuilder {
       let prologSource = "";
 
       for (const entry of contents) {
-        const prolog = entry.content?.prolog;
+        const prolog = entry.prolog;
         if (prolog) {
           prologSource += prolog + "\n";
         } else {
-          logger.warn(
-            { fileName: entry.fileName },
-            "Skipping file with missing Prolog content"
-          );
+          logger.warn({ entry }, "Skipping entry with missing Prolog content");
         }
       }
 
