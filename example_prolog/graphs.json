@@ -1,3 +1,0 @@
-{
-  "prolog": ":- dynamic edge/2, path/3.\n\nedge(a, b).\nedge(b, c).\nedge(c, d).\nedge(a, e).\nedge(e, f).\nedge(f, d).\nedge(d, g).\nedge(g, h).\n\nmember(X, [X|_]).\nmember(X, [_|T]) :- member(X, T).\n\npath(X, Y, Path) :- travel(X, Y, [X], Path).\n\ntravel(X, X, Visited, Visited).\ntravel(X, Y, Visited, Path) :-\n    edge(X, Z),\n    \\+ member(Z, Visited),\n    travel(Z, Y, [Z|Visited], Path)."
-}

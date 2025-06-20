@@ -1,22 +1,14 @@
 import { Router, RequestHandler } from "express";
 import YjsService from "../services/YjsService";
-import { APIRule } from "../types";
+import { VerifiableCredential } from "verifiable-credential-toolkit";
 
 export default function createPrologRouter(service: YjsService): Router {
   const router = Router();
 
   const handler: RequestHandler = async (req, res, next) => {
     try {
-      const { prolog } = req.body;
-      if (typeof prolog !== "string") {
-        res.status(400).json({ error: "Invalid prolog rule format" });
-        return;
-      }
-      const apiRule: APIRule = {
-        prolog,
-        timestamp: new Date().toISOString(),
-      };
-      await service.addItem(apiRule);
+      const verifiableCredential: VerifiableCredential = req.body;
+      await service.addItem(verifiableCredential);
       res
         .status(200)
         .json({ message: "Prolog rule added successfully to Yjs array" });

@@ -1,16 +1,16 @@
 import * as Y from "yjs";
-import { PrologYArrayItem } from "../types";
+import { VerifiableCredential } from "verifiable-credential-toolkit";
 
 class YjsService {
   private yDoc: Y.Doc;
-  private yarray: Y.Array<PrologYArrayItem>;
+  private yarray: Y.Array<VerifiableCredential>;
 
-  constructor(yDoc: Y.Doc, yarray: Y.Array<PrologYArrayItem>) {
+  constructor(yDoc: Y.Doc, yarray: Y.Array<VerifiableCredential>) {
     this.yDoc = yDoc;
     this.yarray = yarray;
   }
 
-  public addItem(item: PrologYArrayItem): void {
+  public addItem(item: VerifiableCredential): void {
     this.yarray.push([item]);
   }
 
@@ -18,7 +18,7 @@ class YjsService {
     return this.yDoc;
   }
 
-  public getArray(): Y.Array<PrologYArrayItem> {
+  public getArray(): Y.Array<VerifiableCredential> {
     return this.yarray;
   }
 

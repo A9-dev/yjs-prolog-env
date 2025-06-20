@@ -3,20 +3,11 @@ import path from "path";
 import chokidar, { FSWatcher } from "chokidar";
 import logger from "./logger";
 import YjsService from "./services/YjsService";
-import { FileEntry } from "./types";
+import { VerifiableCredential } from "verifiable-credential-toolkit";
 
 interface WatcherOptions {
   ignoreInitial?: boolean;
   persistent?: boolean;
-}
-
-function isValidPrologJson(data: any): data is { prolog: string } {
-  return (
-    data &&
-    typeof data === "object" &&
-    typeof data.prolog === "string" &&
-    data.prolog.trim().length > 0
-  );
 }
 
 class JSONFileWatcher {
@@ -72,27 +63,19 @@ class JSONFileWatcher {
     try {
       const fileContent = await fs.readFile(absFilePath, "utf-8");
       const jsonData = JSON.parse(fileContent);
-      if (!isValidPrologJson(jsonData)) {
-        logger.warn(
-          { filePath: absFilePath },
-          "Invalid prolog format in JSON file, skipping"
-        );
-        return;
-      }
 
       logger.debug(
         { filePath: absFilePath, prolog: jsonData.prolog },
         "Valid prolog rule found in JSON file"
       );
 
-      const fileEntry: FileEntry = {
-        fileName: path.basename(filePath),
-        filePath: absFilePath,
-        prolog: jsonData.prolog,
-        timestamp: new Date().toISOString(),
-      };
-      this.yjsService.addItem(fileEntry);
-      logger.info({ fileName: fileEntry.fileName }, "File added to Yjs array");
+      const verifiableCredential: VerifiableCredential =
+        jsonData as VerifiableCredential;
+      this.yjsService.addItem(verifiableCredential);
+      logger.info(
+        { filePath: absFilePath },
+        "Added new item to Yjs array from JSON file"
+      );
     } catch (error) {
       logger.error(
         { filePath: absFilePath, err: error },
