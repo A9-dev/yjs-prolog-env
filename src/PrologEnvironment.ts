@@ -87,7 +87,7 @@ class PrologEnvironment {
       let prologSource = "";
 
       for (const entry of contents) {
-        const prolog = entry.prolog;
+        const prolog = entry.credentialSubject?.prolog;
         if (prolog) {
           prologSource += prolog + "\n";
         } else {

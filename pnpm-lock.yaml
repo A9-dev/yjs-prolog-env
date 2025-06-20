@@ -23,6 +23,9 @@ importers:
       swipl-wasm:
         specifier: ^5.0.11
         version: 5.0.11
+      verifiable-credential-toolkit:
+        specifier: ^0.5.0
+        version: 0.5.0
       y-websocket:
         specifier: ^3.0.0
         version: 3.0.0(yjs@13.6.27)
@@ -526,6 +529,9 @@ packages:
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
+
+  verifiable-credential-toolkit@0.5.0:
+    resolution: {integrity: sha512-btDazY5u2j+9ifJNR0o2dZ821louaVoAbxz4eceg0L6ce/GsQ+PSNySE8v13rPA+1iC3b88Nx8UhQ2UIJFGiWA==}
 
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
@@ -1062,6 +1068,8 @@ snapshots:
   v8-compile-cache-lib@3.0.1: {}
 
   vary@1.1.2: {}
+
+  verifiable-credential-toolkit@0.5.0: {}
 
   wrappy@1.0.2: {}
 
