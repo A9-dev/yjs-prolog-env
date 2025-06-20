@@ -1,0 +1,19 @@
+{
+  "@context": ["https://www.w3.org/ns/credentials/v2"],
+  "id": "urn:uuid:9a3e3c0e-2db0-412a-95c7-cf5520ba78df",
+  "type": ["VerifiableCredential", "UserCredential"],
+  "issuer": "https://www.example.com/",
+  "credentialSubject": {
+    "prolog": ":- dynamic house/5.\n\n% member(Element, List)\nmember(X, [X|_]).\nmember(X, [_|T]) :- member(X, T).\n\n% house(Nationality, Color, Pet, Drink, Cigarette)\n% Example house data: house(Nationality, Color, Pet, Drink, Cigarette)\n\nsolve(Houses) :-\n    length(Houses, 5), % There are five houses\n    member(house(englishman, red, _, _, _), Houses),\n    member(house(spaniard, _, dog, _, _), Houses),\n    member(house(_, green, _, coffee, _), Houses),\n    member(house(_, _, _, milk, _), Houses),\n    member(house(_, yellow, _, _, marlboro), Houses),\n    member(house(norwegian, _, _, _, _), Houses),\n    next_to(house(_, green, _, coffee, _), house(_, ivory, _, _, _), Houses),\n    right_of(house(_, green, _, coffee, _), house(_, ivory, _, _, _), Houses),\n    member(house(_, _, zebra, water, _), Houses),\n    member(house(_, _, fish, _, _), Houses).\n\n% Right of X is to the immediate right of Y in the list\nright_of(A, B, [B, A | _]).\nright_of(A, B, [_ | T]) :- right_of(A, B, T).\n\n% Next to X is either immediately left or right of Y\nnext_to(A, B, [B, A | _]).\nnext_to(A, B, [A, B | _]).\nnext_to(A, B, [_ | T]) :- next_to(A, B, T)."
+  },
+  "validFrom": "2024-08-22T13:53:32.295644150Z",
+  "credentialSchema": {
+    "id": "https://www.example.com/foo.json",
+    "type": "JsonSchema"
+  },
+  "proof": {
+    "type": "Ed25519Signature2018",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "DrkxpgnKrYo2D2N3Ar2KedJMMPGSyvBhXN8doJufIM1oCfW9uzapUKYnDcxP/+BTNGbOgGzGWdSNIvEYUpZMDA=="
+  }
+}

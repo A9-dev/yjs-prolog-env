@@ -1,0 +1,19 @@
+{
+  "@context": ["https://www.w3.org/ns/credentials/v2"],
+  "id": "urn:uuid:9a3e3c0e-2db0-412a-95c7-cf5520ba78df",
+  "type": ["VerifiableCredential", "UserCredential"],
+  "issuer": "https://www.example.com/",
+  "credentialSubject": {
+    "prolog": ":- dynamic edge/2, path/3.\n\nedge(a, b).\nedge(b, c).\nedge(c, d).\nedge(a, e).\nedge(e, f).\nedge(f, d).\nedge(d, g).\nedge(g, h).\n\nmember(X, [X|_]).\nmember(X, [_|T]) :- member(X, T).\n\npath(X, Y, Path) :- travel(X, Y, [X], Path).\n\ntravel(X, X, Visited, Visited).\ntravel(X, Y, Visited, Path) :-\n    edge(X, Z),\n    \\+ member(Z, Visited),\n    travel(Z, Y, [Z|Visited], Path)."
+  },
+  "validFrom": "2024-08-22T13:53:32.295644150Z",
+  "credentialSchema": {
+    "id": "https://www.example.com/foo.json",
+    "type": "JsonSchema"
+  },
+  "proof": {
+    "type": "Ed25519Signature2018",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "9/uTOAQldZMlQia8XIiw8E2JGAlJ8pcKYjt8GBuuYbQoMgcoXSFh2DEU7EyxRvJI6dZC+/9XfSQlGRaS/AuEAA=="
+  }
+}
