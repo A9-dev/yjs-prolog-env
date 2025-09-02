@@ -13,6 +13,14 @@ class YjsService {
   public addItem(item: VerifiableCredential): void {
     this.yarray.push([item]);
   }
+  public removeItem(item: VerifiableCredential): void {
+    const index = this.yarray
+      .toArray()
+      .findIndex((i) => JSON.stringify(i) === JSON.stringify(item));
+    if (index !== -1) {
+      this.yarray.delete(index);
+    }
+  }
 
   public getDoc(): Y.Doc {
     return this.yDoc;

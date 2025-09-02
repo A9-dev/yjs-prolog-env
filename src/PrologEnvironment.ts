@@ -1,6 +1,7 @@
 import logger from "./logger";
 import SWIPL from "swipl-wasm";
 import YjsService from "./services/YjsService";
+import { YEvent } from "yjs";
 
 class PrologEnvironment {
   private yjsService: YjsService;
@@ -53,14 +54,20 @@ class PrologEnvironment {
    */
   private setupYjsObserver() {
     const ydoc = this.yjsService.getDoc();
-    ydoc.on("update", async () => {
-      logger.debug("Yjs document updated - triggering Prolog build process");
-      try {
-        await this.buildPrologKnowledgeBase();
-        logger.info("Prolog knowledge base rebuilt successfully");
-        //! Run custom logic here if implementing a bespoke service
-      } catch (err) {
-        logger.error({ error: err }, "Error during Prolog build or query");
+    const yarray = this.yjsService.getArray();
+    yarray.observe((event) => {
+      logger.info({ delta: event.changes.delta }, "Yjs array updated");
+      // Check for delete operations in the delta
+      for (const change of event.changes.delta) {
+        if (change.delete) {
+          // Find the deleted objects from the event
+          // event.changes.deleted holds the deleted elements as a Set
+          const deletedItems = Array.from(event.changes.deleted || []);
+          logger.info(
+            { deletedItems },
+            "Yjs array delete operation: deleted objects"
+          );
+        }
       }
     });
   }
@@ -127,6 +134,38 @@ class PrologEnvironment {
       }
     } catch (err) {
       logger.error({ error: err }, "SWIPL engine initialization failed");
+    }
+  }
+
+  private async assertFact(fact: string): Promise<boolean> {
+    this.ensureInitialised();
+    if (!this.swiplEngine) {
+      logger.warn("SWIPL engine not initialized. Skipping assertion.");
+      return false;
+    }
+
+    try {
+      const result = this.swiplEngine.prolog.query(`assert(${fact}).`);
+      return result;
+    } catch (err) {
+      logger.error({ error: err, fact }, "Error during Prolog assertion");
+      return false;
+    }
+  }
+
+  private async retractFact(fact: string): Promise<boolean> {
+    this.ensureInitialised();
+    if (!this.swiplEngine) {
+      logger.warn("SWIPL engine not initialized. Skipping retraction.");
+      return false;
+    }
+
+    try {
+      const result = this.swiplEngine.prolog.retract(fact);
+      return result;
+    } catch (err) {
+      logger.error({ error: err, fact }, "Error during Prolog retraction");
+      return false;
     }
   }
 
